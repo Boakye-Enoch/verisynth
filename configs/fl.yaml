@@ -1,0 +1,74 @@
+# =============================================================================
+# VERISYNTH — Federated Learning Configuration
+# =============================================================================
+
+fl:
+  enabled: true
+  seed: 42
+
+  # ---------------------------------------------------------------------------
+  # Round settings
+  # ---------------------------------------------------------------------------
+  rounds:
+    total:               10       # Total FL rounds
+    clients_per_round:   10       # Vehicles selected per round
+    min_clients:         3        # Minimum clients to proceed
+    selection:           random   # random | trust_weighted
+
+  # ---------------------------------------------------------------------------
+  # Aggregation
+  # ---------------------------------------------------------------------------
+  aggregation:
+    # Strategy: fedavg | krum | trimmed_mean | median
+    strategy:            fedavg
+
+    # FedAvg: weighted by number of local samples
+    fedavg:
+      weighted: true
+
+    # Multi-Krum: Byzantine-resilient
+    # Tolerates f Byzantine clients out of n total
+    krum:
+      byzantine_fraction: 0.3    # assume up to 30% of clients are malicious
+      multi_k:            5      # select top-k models before averaging
+
+    # Trimmed mean: trim fraction from each end
+    trimmed_mean:
+      trim_fraction: 0.2
+
+    # Coordinate-wise median
+    median:
+      enabled: false
+
+  # ---------------------------------------------------------------------------
+  # Client settings
+  # ---------------------------------------------------------------------------
+  client:
+    min_samples:         10      # Min local sequences to participate
+    local_epochs:        2       # Local training epochs per round
+    learning_rate:       0.0001  # Lower LR for FL fine-tuning
+    batch_size:          32
+
+  # ---------------------------------------------------------------------------
+  # Poison detection
+  # ---------------------------------------------------------------------------
+  poison_detection:
+    enabled:             false
+    # Cosine similarity threshold — updates below this are rejected
+    cosine_threshold:    0.0
+    # L2 norm threshold — updates too large are clipped
+    norm_clip:           10.0
+
+  # ---------------------------------------------------------------------------
+  # Model versioning
+  # ---------------------------------------------------------------------------
+  model_store:
+    dir:                 "outputs/models/fl/"
+    keep_rounds:         5       # Keep last N round checkpoints
+
+  # ---------------------------------------------------------------------------
+  # Output
+  # ---------------------------------------------------------------------------
+  output:
+    metrics_jsonl:       "outputs/logs/fl_metrics.jsonl"
+    rounds_dir:          "outputs/models/fl/"

@@ -1,0 +1,174 @@
+# =============================================================================
+# VERISYNTH — Attack Configuration
+# Defines attack scenarios for V2X vulnerability demonstration.
+#
+# Attack types implemented:
+#   replay   — capture and re-transmit legitimate BSM/CAM messages
+#   spoofing — inject false position/speed data
+#   dos      — flood channel to cause congestion and packet loss
+#   sybil    — create multiple fake vehicle identities
+#
+# Usage:
+#   Baseline run (no attacks): set all enabled: false
+#   Attack run: set target attacks enabled: true
+#   Mixed run: enable multiple attacks at different start times
+# =============================================================================
+
+attacks:
+
+  # Global attack enable switch
+  enabled: true
+
+  # Random seed for attack scheduling (inherited from simulation.yaml)
+  seed: "inherit"
+
+  # ---------------------------------------------------------------------------
+  # Replay Attack
+  # Captures legitimate BSM/CAM frames and re-transmits them later.
+  # Bypasses authentication when security is disabled (baseline).
+  # Detected by: rolling counter check (counter < expected).
+  # ---------------------------------------------------------------------------
+  replay:
+    enabled: true
+    start_step: 500           # Begin attack at step 500 (25s)
+    end_step: 1500            # End attack at step 1500 (75s)
+
+    # Steps to capture before replaying
+    capture_duration_steps: 100
+
+    # Delay between capture and replay (steps)
+    replay_delay_steps: 50
+
+    # Fraction of captured frames to replay (0.0-1.0)
+    replay_fraction: 0.8
+
+    # Target vehicle IDs (empty = random selection)
+    target_vehicles: []
+
+    # Number of target vehicles to attack simultaneously
+    num_targets: 3
+
+    # Replay each captured frame N times
+    replay_repetitions: 3
+
+  # ---------------------------------------------------------------------------
+  # Position Spoofing Attack
+  # Injects BSM messages with false GPS coordinates.
+  # Makes vehicles appear to be at wrong location.
+  # Detected by: position plausibility check, neighbour corroboration.
+  # ---------------------------------------------------------------------------
+  spoofing:
+    enabled: true
+    start_step: 1000          # Begin at step 1000 (50s)
+    end_step: 2500            # End at step 2500 (125s)
+
+    # Spoofing type: position | speed | heading | combined
+    spoof_type: "position"
+
+    # Position offset injected (meters from true position)
+    position_offset_x: 150.0
+    position_offset_y: 150.0
+
+    # Speed spoofing: report this speed regardless of actual
+    false_speed_ms: 0.0       # Report as stopped
+
+    # Heading spoofing: offset from true heading (degrees)
+    heading_offset_deg: 180.0  # Report opposite direction
+
+    # Target vehicles (empty = random selection)
+    target_vehicles: []
+    num_targets: 5
+
+    # Fraction of BSMs to spoof (1.0 = all messages from target)
+    spoof_fraction: 1.0
+
+  # ---------------------------------------------------------------------------
+  # Denial of Service (DoS) Attack
+  # Floods V2X channel with high-frequency messages.
+  # Causes packet loss for legitimate vehicles via congestion.
+  # Detected by: channel busy ratio, inter-arrival time anomaly.
+  # ---------------------------------------------------------------------------
+  dos:
+    enabled: true
+    start_step: 2000          # Begin at step 2000 (100s)
+    end_step: 3500            # End at step 3500 (175s)
+
+    # Messages injected per step per attacking vehicle
+    messages_per_step: 20
+
+    # Attacking vehicles (empty = random selection)
+    target_vehicles: []
+    num_attackers: 2
+
+    # Message type used for flooding
+    flood_msg_type: "BSM"
+
+    # Transmit power for flood messages (dBm) — higher = more interference
+    tx_power_dbm: 33.0        # 10dB above normal (23dBm)
+
+  # ---------------------------------------------------------------------------
+  # Sybil Attack
+  # Creates multiple fake vehicle identities from one physical vehicle.
+  # Fake vehicles broadcast false BSMs to manipulate traffic perception.
+  # Detected by: position consistency, RSU triangulation, neighbour count.
+  # ---------------------------------------------------------------------------
+  sybil:
+    enabled: true
+    start_step: 3000          # Begin at step 3000 (150s)
+    end_step: 5000            # End at step 5000 (250s)
+
+    # Number of fake identities created per attacking vehicle
+    fake_identities_per_attacker: 5
+
+    # Attacking vehicles
+    target_vehicles: []
+    num_attackers: 2
+
+    # Fake vehicle position spread (meters from attacker)
+    position_spread_m: 50.0
+
+    # Fake BSM transmission interval (steps)
+    fake_bsm_interval_steps: 2
+
+    # Fake vehicle speed (m/s)
+    fake_speed_ms: 8.0
+
+  # ---------------------------------------------------------------------------
+  # GPS Spoofing Attack
+  # Simulates satellite signal manipulation with gradual coordinate drift.
+  # Phase 1: noise, Phase 2: drift, Phase 3: lock, Phase 4: tunnel
+  # Detected by: CNN-LSTM temporal pattern, autoencoder drift signature
+  # ---------------------------------------------------------------------------
+  gps_spoofing:
+    enabled: true
+    start_step: 1500
+    end_step: 3000
+    num_targets: 3
+    target_vehicles: []
+    drift_rate_m: 2.0
+    max_drift_m: 120.0
+    ghost_offset_x: 200.0
+    ghost_offset_y: 200.0
+    spoof_fraction: 1.0
+    warmup_steps: 50
+    noise_std_m: 1.5
+    tunnel_enabled: true
+
+  # ---------------------------------------------------------------------------
+  # Forceful Attack (Brute Force V2X Authentication)
+  # Floods HMAC authentication layer with forged packets.
+  # On brute force success: injects false authority commands.
+  # Detected by: MSG_FLOOD rule, hmac_valid ratio drop, CNN-LSTM
+  # ---------------------------------------------------------------------------
+  forceful:
+    enabled: true
+    start_step: 3500
+    end_step: 5500
+    num_targets: 4
+    target_vehicles: []
+    packets_per_step: 15
+    hmac_mutation_rate: 0.95
+    inject_false_command: true
+    false_command_type: "EMERGENCY_BRAKE"
+    brute_force_interval: 10
+    flood_on_fail: true

@@ -1,0 +1,30 @@
+simulation:
+
+  name: "verisynth_baseline"
+  seed: 42
+  fixed_delta_seconds: 0.05
+  duration_seconds: 300.0
+  max_steps: 6000
+  warmup_steps: 200
+
+  output:
+    base_dir: "outputs/"
+    create_run_subdir: true
+    overwrite: false
+
+  logging:
+    level: "INFO"
+    console: true
+    file: true
+    log_filename: "outputs/logs/simulation.log"
+    structured: true
+
+  sync:
+    metrics_interval_steps: 100
+    max_position_error_m: 2.0
+    max_speed_error_ms: 1.0
+    desync_abort_threshold: 50
+
+  scenario:
+    active_scenario: null
+    scenario_dir: "simulation/scenario/definitions/"

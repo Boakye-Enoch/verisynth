@@ -1,0 +1,9 @@
+outputs/
+simulation/
+server/
+# Large files
+outputs/packets/*.jsonl
+outputs/trajectories/*.jsonl
+simulation/
+*.pt
+*.pth

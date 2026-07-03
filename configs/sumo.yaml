@@ -1,0 +1,128 @@
+# =============================================================================
+# VERISYNTH — SUMO Subsystem Configuration
+# Values marked "inherit" are injected from simulation.yaml at load time.
+# CRITICAL: step_length MUST equal simulation.fixed_delta_seconds (0.05)
+# =============================================================================
+
+sumo:
+
+  # ---------------------------------------------------------------------------
+  # Network / Map
+  # ---------------------------------------------------------------------------
+  network:
+    # SUMO network file — must match CARLA map topology (Town04)
+    net_file: "simulation/sumo/maps/Town04.net.xml"
+    # Additional route files loaded at startup
+    route_files:
+      - "simulation/sumo/maps/carlavtypes.rou.xml"
+      - "simulation/sumo/maps/Town04.rou.xml"
+    # Additional config files
+    additional_files: []
+
+  # ---------------------------------------------------------------------------
+  # TraCI Connection
+  # ---------------------------------------------------------------------------
+  traci:
+    port: 8813                    # Default SUMO TraCI port — must not conflict
+    host: "localhost"
+    num_clients: 1
+    connection_timeout: 30.0      # Seconds to wait for TraCI handshake
+
+  # ---------------------------------------------------------------------------
+  # Simulation Timing
+  # ---------------------------------------------------------------------------
+  timing:
+    step_length: "inherit"        # resolved from simulation.yaml → 0.05
+    begin: 0.0                    # Simulation start time (seconds)
+    end: 99999.0                  # Effectively unlimited — controlled by max_steps
+    seed: "inherit"               # resolved from simulation.yaml → 42
+
+  # ---------------------------------------------------------------------------
+  # SUMO Launch
+  # ---------------------------------------------------------------------------
+  launch:
+    binary: "sumo"                # Use "sumo-gui" for visual debugging
+    # Extra CLI flags passed directly to SUMO process
+    extra_args:
+      - "--no-step-log"
+      - "--no-warnings"
+      - "--collision.action"
+      - "warn"
+      - "--time-to-teleport"
+      - "-1"                      # Disable teleporting (critical for co-sim)
+      - "--lateral-resolution"
+      - "0.8"
+    # Seconds to wait for SUMO process to start before TraCI connect attempt
+    startup_wait_seconds: 3.0
+    # Log SUMO stdout/stderr to file
+    log_file: "outputs/logs/sumo.log"
+
+  # ---------------------------------------------------------------------------
+  # Vehicle Management
+  # ---------------------------------------------------------------------------
+  vehicles:
+    # Maximum vehicles SUMO will simulate simultaneously
+    max_vehicles: 200
+
+    # Teleport prevention — if a vehicle is stuck longer than this, warn
+    # Set to -1 in extra_args above to fully disable teleporting
+    time_to_teleport: -1
+
+    # Minimum gap between vehicles (meters)
+    min_gap: 2.5
+
+    # TraCI subscription variables fetched every step for each vehicle
+    # These map to traci.constants values
+    subscriptions:
+      - "VAR_POSITION"          # traci.constants.VAR_POSITION
+      - "VAR_POSITION3D"        # traci.constants.VAR_POSITION3D
+      - "VAR_ANGLE"             # traci.constants.VAR_ANGLE
+      - "VAR_SPEED"             # traci.constants.VAR_SPEED
+      - "VAR_ACCELERATION"      # traci.constants.VAR_ACCELERATION
+      - "VAR_ROAD_ID"           # traci.constants.VAR_ROAD_ID
+      - "VAR_LANE_ID"           # traci.constants.VAR_LANE_ID
+      - "VAR_LANE_INDEX"        # traci.constants.VAR_LANE_INDEX
+      - "VAR_TYPE"              # traci.constants.VAR_TYPE
+      - "VAR_LENGTH"            # traci.constants.VAR_LENGTH
+      - "VAR_WIDTH"             # traci.constants.VAR_WIDTH
+      - "VAR_SIGNALS"           # traci.constants.VAR_SIGNALS
+      - "VAR_EDGES"             # traci.constants.VAR_EDGES
+
+    # SUMO vehicle type → CARLA blueprint mapping
+    # Used by cosim_sync to spawn correct CARLA actor per SUMO vehicle type
+    type_map:
+      "passenger":    "vehicle.tesla.model3"
+      "truck":        "vehicle.carlamotors.carlacola"
+      "bus":          "vehicle.mitsubishi.fusorosa"
+      "motorcycle":   "vehicle.kawasaki.ninja"
+      "bicycle":      "vehicle.bh.crossbike"
+      "emergency":    "vehicle.dodge.charger_police"
+      "default":      "vehicle.tesla.model3"
+
+  # ---------------------------------------------------------------------------
+  # Traffic Lights
+  # ---------------------------------------------------------------------------
+  traffic_lights:
+    # Let SUMO control all traffic lights (CARLA lights ignored in co-sim)
+    sumo_controls_lights: true
+    # Sync SUMO traffic light states to CARLA every N steps
+    sync_interval_steps: 1
+
+  # ---------------------------------------------------------------------------
+  # Teleport / Stuck Vehicle Prevention
+  # ---------------------------------------------------------------------------
+  safety:
+    # Warn if a vehicle has not moved more than this (meters) in N steps
+    stuck_distance_threshold_m: 0.5
+    stuck_check_steps: 100
+    # Remove vehicle from simulation if stuck beyond this many steps
+    stuck_remove_after_steps: 300
+
+  # ---------------------------------------------------------------------------
+  # Lifecycle
+  # ---------------------------------------------------------------------------
+  lifecycle:
+    close_on_shutdown: true
+    kill_process_on_shutdown: true
+    # Seconds to wait for clean SUMO shutdown before force-killing
+    shutdown_timeout_seconds: 5.0

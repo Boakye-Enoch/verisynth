@@ -1,0 +1,77 @@
+# =============================================================================
+# VERISYNTH — CARLA Subsystem Configuration
+# Values marked "inherit" are injected from simulation.yaml at load time.
+# DO NOT hardcode fixed_delta_seconds or seed here.
+# =============================================================================
+
+carla:
+
+  server:
+    host: "localhost"
+    port: 2000
+    timeout_seconds: 60.0
+    max_connect_retries: 5
+    retry_interval_seconds: 5.0
+
+  world:
+    map: "Town04"
+    fixed_delta_seconds: "inherit"   # resolved from simulation.yaml
+    seed: "inherit"                  # resolved from simulation.yaml
+    synchronous_mode: true           # MUST be true for co-simulation
+    no_rendering: false
+    physics_substeps: 10
+    cleanup_on_connect: true
+
+  traffic_manager:
+    port: 8000
+    tm_deterministic: true
+    tm_seed: "inherit"               # resolved from simulation.yaml
+    global_speed_factor: 1.0
+    global_distance_to_leading_vehicle: 2.5
+    ignore_lights_percentage: 0.0
+    hybrid_physics_radius: 70.0
+
+  spawning:
+    max_spawn_retries: 10
+    min_spawn_distance: 8.0
+    default_vehicle_blueprint: "vehicle.tesla.model3"
+    default_pedestrian_blueprint: "walker.pedestrian.0001"
+    blueprint_seed: "inherit"        # resolved from simulation.yaml
+    log_spawn_events: true
+
+  physics:
+    enable_for_synced_vehicles: true
+    enable_for_tm_vehicles: true
+    gravity: -9.81
+
+  weather:
+    preset: "ClearNoon"
+    overrides:
+      cloudiness: 10.0
+      precipitation: 0.0
+      precipitation_deposits: 0.0
+      wind_intensity: 10.0
+      sun_azimuth_angle: 45.0
+      sun_altitude_angle: 60.0
+      fog_density: 0.0
+      fog_distance: 0.0
+      wetness: 0.0
+
+  sensors:
+    default_sensor_tick: 0.0
+    gnss:
+      enabled: true
+    imu:
+      enabled: true
+    camera:
+      enabled: false
+    lidar:
+      enabled: false
+
+  lifecycle:
+    destroy_actors_on_shutdown: true
+    restore_settings_on_shutdown: true
+    reconnect_on_timeout: true
+    mid_run_reconnect_attempts: 3
+    tick_timeout_seconds: 30.0
+    actor_health_check_interval_steps: 500

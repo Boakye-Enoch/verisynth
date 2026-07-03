@@ -1,0 +1,175 @@
+ids
+  enabled: true
+  seed: inherit
+  detection_interval_steps: 20
+  features:
+    window_size: 20
+    sequence_length: 20
+    sequence_stride: 1
+    feature_dim: 12
+    names:
+    - counter_delta
+    - position_delta_m
+    - speed_ms
+    - heading_delta_deg
+    - rssi_dbm
+    - sinr_db
+    - inter_arrival_steps
+    - msg_frequency
+    - neighbour_count
+    - hmac_valid
+    - per
+    - distance_m
+    normalization:
+      counter_delta:
+      - 0.0
+      - 127.0
+      position_delta_m:
+      - 0.0
+      - 200.0
+      speed_ms:
+      - 0.0
+      - 50.0
+      heading_delta_deg:
+      - 0.0
+      - 180.0
+      rssi_dbm:
+      - -120.0
+      - 0.0
+      sinr_db:
+      - -20.0
+      - 50.0
+      inter_arrival_steps:
+      - 0.0
+      - 100.0
+      msg_frequency:
+      - 0.0
+      - 50.0
+      neighbour_count:
+      - 0.0
+      - 50.0
+      hmac_valid:
+      - 0.0
+      - 1.0
+      per:
+      - 0.0
+      - 1.0
+      distance_m:
+      - 0.0
+      - 300.0
+ orchestrator:
+    w1_ids:            0.45
+    w2_anomaly:        0.25
+    w3_history:        0.30
+    threshold_isolate: 0.70
+    threshold_warn:    0.45
+    threshold_restore: 0.25
+    restore_cycles:    10
+
+ rule_based:
+    enabled: true
+    replay:
+      counter_regression_threshold: 100
+      frozen_position_steps: 25
+      inter_arrival_threshold: 1
+      confidence: 0.92
+      frozen_position_warmup_steps: 200
+      frozen_position_min_speed_mps: 2.0
+      frozen_position_confidence: 0.75
+    spoofing:
+      max_position_jump_m: 20.0
+      max_heading_delta_deg: 120.0
+      max_speed_ms: 70.0
+      confidence: 0.88
+    dos:
+      max_frequency: 50.0
+      min_sinr_db: 3.0
+      confidence: 0.82
+    sybil:
+      max_neighbour_growth: 8
+      confidence: 0.85
+    general:
+      min_hmac_valid_ratio: 0.9
+      min_received_ratio: 0.2
+  ml:
+    enabled: true
+    model:
+      type: cnn_lstm
+      input_features: 12
+      sequence_length: 20
+      cnn_channels:
+      - 32
+      - 64
+      cnn_kernel_size: 3
+      cnn_padding: 1
+      pool_kernel_size: 2
+      lstm_hidden_size: 128
+      lstm_layers: 2
+      lstm_dropout: 0.2
+      lstm_bidirectional: false
+      fc_hidden: 64
+      dropout: 0.3
+      num_classes: 6
+      device: cpu
+    training:
+      batch_size: 64
+      learning_rate: 0.001
+      local_epochs: 3
+      validation_split: 0.2
+      gradient_clip: 1.0
+      weight_decay: 0.0001
+      use_class_weights: true
+      min_samples: 10
+      retrain_interval_steps: 500
+    inference:
+      anomaly_threshold: 0.7
+      unknown_threshold: 0.95
+      min_confidence: 0.92
+    checkpoints:
+      dir: outputs/models/local/
+      save_interval_rounds: 5
+  alerts:
+    suppression_window_steps: 300
+    max_alerts_per_vehicle: 50
+    log_to_event_logger: true
+    severity_map:
+      REPLAY: HIGH
+      SPOOFING: HIGH
+      DOS: MEDIUM
+      SYBIL: HIGH
+      UNKNOWN_ANOMALY: LOW
+      ANOMALY: LOW
+    actions:
+      HIGH: BLOCK
+      MEDIUM: MONITOR
+      LOW: LOG
+  autoencoder:
+    latent_dim: 32
+    hidden_channels: 64
+    threshold_sigma: 3.0
+    learning_rate: 0.001
+    epochs: 5
+  fusion:
+    weight_rule: 0.4
+    weight_ml: 0.4
+    weight_ae: 0.2
+    threshold_block: 0.72
+    threshold_monitor: 0.5
+    threshold_log: 0.25
+    min_detectors_block: 2
+    min_detectors_monitor: 1
+  trust:
+    init_trust: 0.7
+    decay_rate: 0.0005
+    recovery_rate: 0.01
+    penalty_block: 0.15
+    penalty_monitor: 0.05
+    penalty_log: 0.01
+  pretrained:
+    cnn_lstm: outputs/models/local/cnn_lstm_pretrained.pt
+    autoencoder: outputs/models/local/autoencoder_pretrained.pt
+    enabled: true
+  output:
+    alerts_jsonl: outputs/logs/ids_alerts.jsonl
+    training_log: outputs/logs/ids_training.log
+    models_dir: outputs/models/local/

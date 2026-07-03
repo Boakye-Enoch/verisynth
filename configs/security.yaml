@@ -1,0 +1,120 @@
+# =============================================================================
+# VERISYNTH — Security Configuration
+# Covers: Key management, pseudonym rotation, distributed key agreement
+#
+# Authentication scheme:
+#   Symmetric Pre-Shared Keys (PSK)
+#   HMAC-SHA256 truncated to 32 bits
+#   Rolling counter replay prevention
+#
+# Key distribution:
+#   RSUs act as Key Distribution Centers (KDC)
+#   Vehicles request key updates via V2X on key rotation events
+#   No asymmetric crypto — lightweight for embedded simulation
+#
+# This is NOT WAVE/ETSI PKI. It is a simplified symmetric scheme
+# suitable for V2X IDS research and dataset generation.
+# =============================================================================
+
+security:
+
+  # ---------------------------------------------------------------------------
+  # Master Key Material
+  # ---------------------------------------------------------------------------
+  master_secret: "VERISYNTH_CAN_SECRET_v1"
+
+  # Seed inherited from simulation.yaml
+  seed: "inherit"
+
+  # ---------------------------------------------------------------------------
+  # Key Rotation
+  # ---------------------------------------------------------------------------
+  key_rotation:
+    # Enable periodic key rotation
+    enabled: true
+
+    # Rotate keys every N simulation steps
+    # At 0.05s/step: 1000 steps = 50 seconds
+    rotation_interval_steps: 1000
+
+    # Rotation strategy: scheduled | triggered | hybrid
+    # scheduled  = rotate at fixed interval regardless of events
+    # triggered  = rotate on suspected compromise
+    # hybrid     = scheduled + triggered
+    strategy: "scheduled"
+
+    # Steps before expiry to begin distributing new key (overlap window)
+    # Prevents gaps where new key not yet received
+    pre_rotation_steps: 50
+
+    # Maximum key age in steps before forced rotation
+    max_key_age_steps: 2000
+
+  # ---------------------------------------------------------------------------
+  # Key Distribution
+  # ---------------------------------------------------------------------------
+  key_distribution:
+    # RSU acts as Key Distribution Center
+    rsu_as_kdc: true
+
+    # Key distribution message interval (steps)
+    distribution_interval_steps: 200
+
+    # Encrypt key distribution messages (simplified XOR for simulation)
+    encrypt_key_messages: true
+
+    # Maximum distance (meters) for key distribution from RSU
+    max_distribution_range_m: 300.0
+
+  # ---------------------------------------------------------------------------
+  # Pseudonym Management (V2X Privacy)
+  # ---------------------------------------------------------------------------
+  pseudonym:
+    # Enable pseudonym rotation for BSM privacy
+    enabled: true
+
+    # Change pseudonym every N steps
+    # At 0.05s/step: 200 steps = 10 seconds
+    change_interval_steps: 200
+
+    # Change pseudonym on: interval | location | speed_change | combined
+    change_trigger: "interval"
+
+    # Pseudonym length in bytes (4 bytes = standard BSM temporary ID)
+    pseudonym_bytes: 4
+
+    # Silent period on pseudonym change (steps where no BSM sent)
+    # Prevents linkability via timing correlation
+    silent_period_steps: 2
+
+  # ---------------------------------------------------------------------------
+  # Key Compromise Simulation (Attack surface — Phase 6)
+  # ---------------------------------------------------------------------------
+  compromise:
+    # Allow simulating key compromise for attack scenarios
+    simulation_enabled: true
+
+    # Fraction of vehicles that can be compromised per scenario
+    max_compromise_fraction: 0.1   # 10% of fleet
+
+    # Steps after compromise before attacker can use key
+    exploitation_delay_steps: 10
+
+  # ---------------------------------------------------------------------------
+  # IDS Integration
+  # ---------------------------------------------------------------------------
+  ids_integration:
+    # Report HMAC failures to IDS immediately
+    report_hmac_failures: true
+
+    # Report counter anomalies to IDS
+    report_counter_anomalies: true
+
+    # Report key rotation events to IDS (baseline for anomaly detection)
+    report_rotation_events: true
+
+    # Threshold: HMAC failures per window before IDS alert
+    hmac_failure_threshold: 3
+
+    # Window size for failure counting (steps)
+    failure_window_steps: 100

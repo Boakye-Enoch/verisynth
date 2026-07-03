@@ -1,0 +1,253 @@
+# =============================================================================
+# VERISYNTH — V2X Subsystem Configuration
+# =============================================================================
+# Covers: DSRC / C-V2X message types, channel model, RSU placement,
+#         communication engine, and protocol parameters.
+#
+# Message types implemented:
+#   BSM  — Basic Safety Message       (DSRC / SAE J2735)
+#   CAM  — Cooperative Awareness Msg  (C-V2X / ETSI EN 302 637-2)
+#   DENM — Decentralised Event Notif  (C-V2X / ETSI EN 302 637-3)
+#
+# INHERITANCE: seed and fixed_delta_seconds are inherited from simulation.yaml
+# =============================================================================
+
+v2x:
+
+  # ---------------------------------------------------------------------------
+  # General
+  # ---------------------------------------------------------------------------
+  enabled: true
+  seed: "inherit"
+
+  # Protocol selection: dsrc | cv2x | both
+  # dsrc  = IEEE 802.11p / WAVE
+  # cv2x  = LTE-V2X / NR-V2X (PC5 sidelink)
+  # both  = simulate both simultaneously (for comparison datasets)
+  protocol: "dsrc"
+
+  # Simulation timestep — inherited from simulation.yaml
+  fixed_delta_seconds: "inherit"
+
+  # ---------------------------------------------------------------------------
+  # Channel Model
+  # ---------------------------------------------------------------------------
+  channel:
+    # Path loss model: freespace | winner+ | log_distance | nakagami
+    path_loss_model: "log_distance"
+
+    # Log-distance model parameters
+    log_distance:
+      path_loss_exponent: 2.7       # Urban: 2.7–3.5
+      reference_distance_m: 1.0
+      reference_path_loss_db: 47.86 # At 1m, 5.9GHz
+
+    # Nakagami-m fading parameters (used on top of path loss)
+    fading:
+      enabled: true
+      m_parameter: 3.0              # m=1 → Rayleigh, m→∞ → AWGN
+
+    # Transmission frequency
+    frequency_ghz: 5.9              # DSRC: 5.9GHz, C-V2X: 5.9GHz
+
+    # Noise floor
+    noise_floor_dbm: -95.0
+
+    # Shadowing (log-normal)
+    shadowing:
+      enabled: true
+      std_dev_db: 3.0               # Urban shadowing std deviation
+
+    # Maximum communication range (hard cutoff beyond this)
+    max_range_m: 300.0
+
+  # ---------------------------------------------------------------------------
+  # DSRC / IEEE 802.11p Parameters
+  # ---------------------------------------------------------------------------
+  dsrc:
+    # Channel bandwidth
+    channel_bandwidth_mhz: 10
+
+    # Transmit power
+    tx_power_dbm: 23.0              # Typical OBU TX power
+
+    # Antenna gain
+    antenna_gain_dbi: 3.0
+
+    # Modulation and coding scheme index (0–7)
+    # 0=BPSK 1/2, 3=QPSK 3/4, 7=64QAM 3/4
+    mcs_index: 3
+
+    # Packet error rate model threshold (SINR in dB)
+    sinr_threshold_db: 5.0
+
+    # Control channel (CCH) vs service channel (SCH)
+    channel: "CCH"                  # CCH = 178, SCH = 172/174/176/180/182/184
+
+  # ---------------------------------------------------------------------------
+  # BSM — Basic Safety Message (SAE J2735, 10 Hz)
+  # ---------------------------------------------------------------------------
+  bsm:
+    enabled: true
+
+    # Transmission interval in seconds
+    # Must be multiple of fixed_delta_seconds
+    interval_seconds: 0.1           # 10 Hz
+
+    # BSM part 1 fields (always transmitted)
+    include_fields:
+      - "msg_count"                 # 0–127 rolling counter
+      - "temporary_id"              # 4-byte pseudonym
+      - "dsecond"                   # milliseconds of current minute
+      - "latitude"                  # WGS84 degrees × 10^7
+      - "longitude"                 # WGS84 degrees × 10^7
+      - "elevation"                 # meters × 10
+      - "speed"                     # m/s × 50
+      - "heading"                   # degrees × 0.0125
+      - "acceleration"              # m/s² × 100
+      - "brakes"                    # brake system status bitfield
+      - "vehicle_size"              # length + width
+
+    # BSM part 2 optional extensions
+    part2_enabled: false
+
+    # Message size in bytes (for channel load calculation)
+    payload_bytes: 38
+
+  # ---------------------------------------------------------------------------
+  # CAM — Cooperative Awareness Message (ETSI EN 302 637-2)
+  # ---------------------------------------------------------------------------
+  cam:
+    enabled: false                  # Enable when protocol: cv2x or both
+
+    # Adaptive frequency: 1–10 Hz based on dynamics
+    min_interval_seconds: 0.1      # 10 Hz max
+    max_interval_seconds: 1.0      # 1 Hz min
+
+    # Trigger conditions (send immediately if exceeded)
+    heading_threshold_deg: 4.0
+    speed_threshold_ms: 0.5
+    position_threshold_m: 4.0
+
+    payload_bytes: 60
+
+  # ---------------------------------------------------------------------------
+  # DENM — Decentralised Environmental Notification (ETSI EN 302 637-3)
+  # ---------------------------------------------------------------------------
+  denm:
+    enabled: true
+
+    # Event types to generate
+    event_types:
+      - "EMERGENCY_BRAKE"
+      - "HAZARD_CONDITION"
+      - "TRAFFIC_CONDITION"
+
+    # Repetition interval for active events
+    repetition_interval_seconds: 1.0
+
+    # Event validity duration
+    validity_duration_seconds: 10.0
+
+    payload_bytes: 90
+
+  # ---------------------------------------------------------------------------
+  # RSU — Road Side Units
+  # ---------------------------------------------------------------------------
+  rsu:
+    enabled: true
+
+    # RSU placement strategy: manual | grid | intersection
+    placement: "intersection"
+
+    # TX power (RSUs typically higher power than OBUs)
+    tx_power_dbm: 30.0
+    antenna_gain_dbi: 6.0
+
+    # RSU communication range
+    range_m: 300.0
+
+    # RSU message types
+    broadcast_types:
+      - "SPAT"                      # Signal Phase and Timing
+      - "MAP"                       # Intersection geometry
+      - "DENM"                      # Hazard notifications
+
+    # Manual RSU placement (used when placement: manual)
+    # Coordinates in SUMO network space
+    manual_positions: []
+
+    # Grid placement parameters (used when placement: grid)
+    grid:
+      spacing_m: 250.0
+
+    # Intersection placement: auto-detect from SUMO network
+    intersection:
+      min_road_count: 3             # Min roads meeting at junction
+
+    # RSU broadcast interval
+    broadcast_interval_seconds: 1.0
+
+  # ---------------------------------------------------------------------------
+  # Communication Engine
+  # ---------------------------------------------------------------------------
+  engine:
+    # Maximum messages processed per simulation step
+    # Prevents O(n²) explosion with many vehicles
+    max_messages_per_step: 500
+
+    # Enable V2I (vehicle to infrastructure) communication
+    v2i_enabled: true
+
+    # Enable V2V (vehicle to vehicle) communication
+    v2v_enabled: true
+
+    # Neighbour table TTL — remove vehicles not heard from in N seconds
+    neighbour_ttl_seconds: 2.0
+
+    # Channel congestion control
+    # If channel busy ratio > threshold, reduce TX power
+    congestion_control:
+      enabled: true
+      busy_ratio_threshold: 0.6
+      power_reduction_db: 3.0
+
+  # ---------------------------------------------------------------------------
+  # Security (Phase 3 — placeholders, not active yet)
+  # ---------------------------------------------------------------------------
+  security:
+    # Lightweight symmetric authentication
+    # Scheme: Truncated HMAC-SHA256 (32-bit) with Rolling counter
+    # Key type: Pre-shared symmetric key per vehicle
+    # Key Derivation: HMAC-SHA256 (MASTER_SECRET, vehicle_id + seed)
+    # Replay Prevention: 16-step rolling counter window
+    # Activated in Phase 3
+    authentication_enabled: true
+
+    # Pseudonym change interval (privacy-BSM temporary ID rotation )
+    pseudonym_change_interval_steps: 200
+
+    # HMAC truncation length (bits) — for lightweight auth
+    hmac_truncation_bits: 32
+
+    # Rolling counter window for replay detection
+    replay_window_size: 16
+
+  # ---------------------------------------------------------------------------
+  # Logging
+  # ---------------------------------------------------------------------------
+  logging:
+    # Log every transmitted message
+    log_tx: true
+
+    # Log every received message
+    log_rx: true
+
+    # Log channel metrics (RSSI, SINR, packet loss) per step
+    log_channel_metrics: true
+
+    # Output file for packet log
+    packet_log_file: "outputs/packets/v2x_packets.jsonl"
+
+    # Output file for channel metrics
+    channel_log_file: "outputs/packets/channel_metrics.jsonl"
