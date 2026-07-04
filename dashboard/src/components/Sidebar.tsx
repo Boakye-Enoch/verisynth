@@ -1,104 +1,83 @@
-import { useSOCStore } from '../store'
+import React from 'react';
+import { LayoutDashboard, Activity, Network, Truck, AlertCircle, Shield, Zap, BarChart3, FileText, RotateCw, Settings, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
-const NAV = [
-  { id: 'dashboard',  label: 'Dashboard',      color: '#3b82f6' },
-  { id: 'map',        label: 'Digital Twin',   color: '#10b981' },
-  { id: 'alerts',     label: 'IDS Alerts',     color: '#ef4444' },
-  { id: 'trust',      label: 'Trust Manager',  color: '#f59e0b' },
-  { id: 'attacks',    label: 'Attack Control', color: '#f97316' },
-  { id: 'model',      label: 'AI Models',      color: '#8b5cf6' },
-  { id: 'scene',      label: 'Scene Control',  color: '#06b6d4' },
-  { id: 'health',     label: 'System Health',  color: '#64748b' },
-]
-
-export default function Sidebar() {
-  const activePanel    = useSOCStore(s => s.activePanel)
-  const setActivePanel = useSOCStore(s => s.setActivePanel)
-  const alerts         = useSOCStore(s => s.alerts)
-  const vehicles       = useSOCStore(s => s.vehicles)
-  const attacks        = useSOCStore(s => s.attacks)
-  const health         = useSOCStore(s => s.health)
-
-  const unreadAlerts = alerts.filter(a =>
-    a.received_at && Date.now() - a.received_at < 10000
-  ).length
-  const activeAttacks = attacks.filter(a => a.active).length
-  const isolated = vehicles.filter(v => v.is_isolated).length
-
-  const badges: Record<string, number> = {
-    alerts:  unreadAlerts,
-    attacks: activeAttacks,
-    trust:   isolated,
-  }
-
-  return (
-    <div style={{
-      background: 'var(--bg1)',
-      borderRight: '1px solid var(--border)',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '12px 0',
-      overflowY: 'auto',
-    }}>
-      <div style={{ padding: '4px 12px 8px', fontSize: 9, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>
-        Navigation
-      </div>
-
-      {NAV.map(item => (
-        <button
-          key={item.id}
-          onClick={() => setActivePanel(item.id)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 9,
-            padding: '7px 14px',
-            cursor: 'pointer',
-            background: activePanel === item.id ? 'rgba(59,130,246,.1)' : 'transparent',
-            color: activePanel === item.id ? '#60a5fa' : '#94a3b8',
-            fontSize: 12,
-            border: 'none',
-            borderLeft: `2px solid ${activePanel === item.id ? item.color : 'transparent'}`,
-            width: '100%',
-            textAlign: 'left',
-            transition: '.15s',
-          }}
-        >
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-          {item.label}
-          {badges[item.id] > 0 && (
-            <span style={{
-              marginLeft: 'auto',
-              background: 'rgba(239,68,68,.2)', color: '#ef4444',
-              fontSize: 9, padding: '1px 5px', borderRadius: 10, fontWeight: 700,
-            }}>{badges[item.id]}</span>
-          )}
-        </button>
-      ))}
-
-      {/* System health summary */}
-      <div style={{ marginTop: 'auto', padding: 12, borderTop: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 9, color: '#64748b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.8px' }}>
-          System
-        </div>
-        {health && (
-          <>
-            <HealthRow label="CPU" value={`${health.cpu_percent.toFixed(0)}%`} />
-            <HealthRow label="Memory" value={`${health.memory_percent.toFixed(0)}%`} />
-            <HealthRow label="WS Clients" value={String(health.ws_clients)} />
-          </>
-        )}
-        <div style={{ marginTop: 8, fontSize: 9, color: '#475569', textAlign: 'center' }}>
-          VERISYNTH v2.0 · IEEE 2025
-        </div>
-      </div>
-    </div>
-  )
+interface SidebarProps {
+  activeSection: string;
+  onSectionChange: (section: string) => void;
 }
 
-function HealthRow({ label, value }: { label: string; value: string }) {
+const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const menuItems = [
+    { id: 'dashboard', label: 'DASHBOARD', icon: LayoutDashboard },
+    { id: 'live-view', label: 'LIVE VIEW', icon: Activity },
+    { id: 'network-topology', label: 'NETWORK TOPOLOGY', icon: Network },
+    { id: 'vehicles', label: 'VEHICLES', icon: Truck },
+    { id: 'ids-detections', label: 'IDS DETECTIONS', icon: AlertCircle },
+    { id: 'trust-manager', label: 'TRUST MANAGER', icon: Shield },
+    { id: 'attack-analysis', label: 'ATTACK ANALYSIS', icon: Zap },
+    { id: 'traffic-monitor', label: 'TRAFFIC MONITOR', icon: BarChart3 },
+    { id: 'performance', label: 'PERFORMANCE', icon: BarChart3 },
+    { id: 'logs-events', label: 'LOGS & EVENTS', icon: FileText },
+    { id: 'replay', label: 'REPLAY', icon: RotateCw },
+    { id: 'reports', label: 'REPORTS', icon: FileText },
+    { id: 'settings', label: 'SETTINGS', icon: Settings },
+  ];
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, padding: '2px 0', color: '#94a3b8' }}>
-      <span>{label}</span>
-      <span style={{ color: '#10b981', fontWeight: 600 }}>{value}</span>
-    </div>
-  )
-}
+    <>
+      {/* Mobile Toggle */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-800 text-white rounded"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Sidebar */}
+      <aside
+        className={`${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:relative left-0 top-0 h-screen w-64 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-blue-900/30 transition-transform duration-300 z-40 pt-20 lg:pt-0 overflow-y-auto`}
+      >
+        <div className="p-6 border-b border-blue-900/30">
+          <div className="flex items-center gap-3">
+            <Shield className="w-8 h-8 text-blue-500" />
+            <div>
+              <h1 className="font-bold text-white text-lg">VERISYNTH</h1>
+              <p className="text-xs text-blue-300">V2X Security</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="p-4 space-y-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  onSectionChange(item.id);
+                  setIsOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  isActive
+                    ? 'bg-blue-600/20 text-blue-400 border-l-2 border-blue-400'
+                    : 'text-slate-300 hover:bg-slate-700/50 hover:text-slate-100'
+                }`}
+              >
+                <Icon size={18} />
+                <span className="text-sm font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
+  );
+};
+
+export default Sidebar;
