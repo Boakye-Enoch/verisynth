@@ -1,0 +1,238 @@
+<!-- 1920x1080 SOC Dashboard mockup for VERISYNTH -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="VERISYNTH SOC dashboard mockup">
+  <defs>
+    <linearGradient id="topbarGrad" x1="0" x2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#0b1220"/>
+    </linearGradient>
+    <linearGradient id="logoGrad" x1="0" x2="1">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="panelGrad" x1="0" x2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#071029"/>
+    </linearGradient>
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- arrow marker for V2V/V2I -->
+    <marker id="arrow" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 z" fill="#7dd3fc" />
+    </marker>
+
+    <!-- trust color palette -->
+    <linearGradient id="trustGood" x1="0" x2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#34d399"/></linearGradient>
+    <linearGradient id="trustWarn" x1="0" x2="1"><stop offset="0" stop-color="#f59e0b"/><stop offset="1" stop-color="#f97316"/></linearGradient>
+    <linearGradient id="trustBad" x1="0" x2="1"><stop offset="0" stop-color="#ef4444"/><stop offset="1" stop-color="#dc2626"/></linearGradient>
+
+    <style>
+      .mono { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+      .muted { fill: #94a3b8; font-size:12px; }
+      .label { fill:#cbd5e1; font-weight:700; font-size:13px; }
+      .small { fill:#94a3b8; font-size:11px; }
+      .panel { fill: url(#panelGrad); stroke: rgba(255,255,255,0.03); rx:8; ry:8; }
+      .card { fill: linear-gradient(#0b1220, #071029); stroke: rgba(255,255,255,0.02); rx:6; ry:6; filter: url(#softShadow); }
+      .pulse { animation: pulse 2s infinite; }
+      @keyframes pulse {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.15); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#071029" />
+
+  <!-- Top navigation bar -->
+  <g transform="translate(0,0)">
+    <rect x="0" y="0" width="1920" height="64" fill="url(#topbarGrad)" />
+    <!-- Logo -->
+    <g transform="translate(20,10)">
+      <rect x="0" y="7" width="48" height="48" rx="8" fill="url(#logoGrad)" />
+      <text x="60" y="34" class="label mono">VERISYNTH</text>
+      <text x="60" y="52" class="small mono" fill="#93c5fd">V2X Security Operations Center</text>
+    </g>
+
+    <!-- Top status cluster -->
+    <g transform="translate(540,12)" class="mono">
+      <rect x="0" y="6" width="380" height="44" rx="10" fill="#071833" stroke="rgba(255,255,255,0.03)"/>
+      <text x="16" y="36" class="small">Backend: <tspan fill="#34d399">• Connected</tspan>  •  WS: <tspan fill="#7dd3fc">• Live</tspan>  • Scene: Town04</text>
+    </g>
+
+    <!-- Search and controls -->
+    <g transform="translate(1500,12)" class="mono">
+      <rect x="0" y="6" width="380" height="44" rx="10" fill="#071833" stroke="rgba(255,255,255,0.03)"/>
+      <text x="16" y="34" class="small">Simulation clock: 00:12:34  •  Step: 1245  •  Weather: ClearNoon</text>
+    </g>
+  </g>
+
+  <!-- Left sidebar -->
+  <g transform="translate(16,86)">
+    <rect x="0" y="0" width="180" height="920" rx="10" class="panel"/>
+    <text x="20" y="28" class="label mono">Dashboard</text>
+
+    <!-- Menu items -->
+    <g transform="translate(0,48)">
+      <g transform="translate(16,0)">
+        <text x="0" y="32" class="small mono" fill="#cbd5e1">• Dashboard</text>
+        <text x="0" y="64" class="small mono" fill="#94a3b8">• Digital Twin</text>
+        <text x="0" y="96" class="small mono" fill="#94a3b8">• Fleet</text>
+        <text x="0" y="128" class="small mono" fill="#94a3b8">• Communications</text>
+        <text x="0" y="160" class="small mono" fill="#94a3b8">• IDS</text>
+        <text x="0" y="192" class="small mono" fill="#94a3b8">• Threat Intel</text>
+        <text x="0" y="224" class="small mono" fill="#94a3b8">• Attack Control</text>
+        <text x="0" y="256" class="small mono" fill="#94a3b8">• Trust Engine</text>
+        <text x="0" y="288" class="small mono" fill="#94a3b8">• AI Models</text>
+        <text x="0" y="320" class="small mono" fill="#94a3b8">• Packet Inspector</text>
+        <text x="0" y="352" class="small mono" fill="#94a3b8">• Scene Control</text>
+        <text x="0" y="384" class="small mono" fill="#94a3b8">• System Health</text>
+        <text x="0" y="416" class="small mono" fill="#94a3b8">• Settings</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right inspector panel -->
+  <g transform="translate(1640,86)">
+    <rect x="0" y="0" width="260" height="920" rx="10" class="panel"/>
+    <text x="20" y="28" class="label mono">Vehicle Inspector</text>
+
+    <!-- Selected vehicle card -->
+    <rect x="20" y="48" width="220" height="120" rx="8" fill="#071322" stroke="rgba(255,255,255,0.03)"/>
+    <text x="34" y="76" class="small mono" fill="#93c5fd">Vehicle ID: 0xA7C4</text>
+    <text x="34" y="98" class="small mono">Speed: —</text>
+    <text x="34" y="118" class="small mono">Trust: —</text>
+
+    <!-- Metrics blocks -->
+    <g transform="translate(20,186)">
+      <rect x="0" y="0" width="220" height="160" rx="8" fill="#071322" stroke="rgba(255,255,255,0.02)"/>
+      <text x="14" y="28" class="small mono" fill="#cbd5e1">CNN-LSTM</text>
+      <text x="14" y="50" class="small mono">F1: —  Precision: —</text>
+      <text x="14" y="74" class="small mono">Inference: — ms</text>
+
+      <text x="14" y="110" class="small mono">Autoencoder</text>
+      <text x="14" y="132" class="small mono">Anomaly Score: —</text>
+    </g>
+
+    <!-- Certificates and neighbors -->
+    <g transform="translate(20,360)">
+      <rect x="0" y="0" width="220" height="140" rx="8" fill="#071322" stroke="rgba(255,255,255,0.02)"/>
+      <text x="14" y="24" class="small mono" fill="#cbd5e1">Neighbors</text>
+      <text x="14" y="48" class="small mono">• veh-102 • veh-221 • RSU-05</text>
+
+      <text x="14" y="80" class="small mono" fill="#cbd5e1">Certificates</text>
+      <text x="14" y="104" class="small mono">• cert-v2x-2026</text>
+    </g>
+  </g>
+
+  <!-- Center digital twin canvas -->
+  <g transform="translate(220,100)">
+    <rect x="0" y="0" width="1400" height="900" rx="10" fill="#04202b" stroke="rgba(255,255,255,0.02)"/>
+
+    <!-- Roads (stylized) -->
+    <g stroke="#083047" stroke-width="24" stroke-linecap="round" fill="none">
+      <path d="M60 200 C 200 160, 400 200, 600 180 S 1100 220, 1340 200" stroke="#0f172a" stroke-width="28"/>
+      <path d="M120 540 C 300 520, 480 560, 760 540 S 1200 580, 1280 560" stroke="#0f172a" stroke-width="28"/>
+      <path d="M70 360 L 130 360 L 1400 360" stroke="#0f172a" stroke-width="28" stroke-dasharray="0 60"/>
+    </g>
+
+    <!-- Lane markings -->
+    <g stroke="#9ca3af" stroke-width="2" stroke-linecap="round" opacity="0.18">
+      <path d="M40 200 C 200 160, 400 200, 600 180 S 1100 220, 1340 200" stroke-dasharray="12 14"/>
+      <path d="M120 540 C 300 520, 480 560, 760 540 S 1200 580, 1280 560" stroke-dasharray="12 14"/>
+    </g>
+
+    <!-- RSUs -->
+    <g transform="translate(1200,120)">
+      <rect x="-12" y="-12" width="24" height="24" rx="4" fill="#7dd3fc" stroke="#0369a1" />
+      <text x="-48" y="28" class="small mono" fill="#93c5fd">RSU-05</text>
+    </g>
+    <g transform="translate(320,180)">
+      <rect x="-12" y="-12" width="24" height="24" rx="4" fill="#7dd3fc" stroke="#0369a1" />
+      <text x="-24" y="36" class="small mono" fill="#93c5fd">RSU-02</text>
+    </g>
+
+    <!-- Vehicles with trust colors -->
+    <!-- Good trust -->
+    <g transform="translate(560,260)">
+      <circle cx="0" cy="0" r="12" fill="url(#trustGood)" stroke="#052e1f" stroke-width="2"/>
+      <text x="-22" y="30" class="small mono" fill="#94a3b8">veh-103</text>
+    </g>
+
+    <!-- Warning trust -->
+    <g transform="translate(760,340)">
+      <circle cx="0" cy="0" r="12" fill="url(#trustWarn)" stroke="#4a2e05" stroke-width="2"/>
+      <text x="-24" y="30" class="small mono" fill="#94a3b8">veh-221</text>
+    </g>
+
+    <!-- Bad trust -->
+    <g transform="translate(980,430)">
+      <circle cx="0" cy="0" r="12" fill="url(#trustBad)" stroke="#3b0f0f" stroke-width="2"/>
+      <text x="-26" y="30" class="small mono" fill="#94a3b8">veh-777</text>
+    </g>
+
+    <!-- Animated communication beams (stylized; arrow markers) -->
+    <g stroke="#7dd3fc" stroke-width="2" stroke-opacity="0.65" fill="none" marker-end="url(#arrow)">
+      <path d="M560 260 C 620 240, 740 260, 760 340" stroke-dasharray="6 8"/>
+      <path d="M760 340 C 820 360, 940 380, 980 430" stroke-dasharray="6 8"/>
+      <!-- V2I -->
+      <path d="M980 430 C 1100 360, 1200 260, 1236 132" stroke-dasharray="6 8"/>
+    </g>
+
+    <!-- Packet flow animation hints (small pulsing dots) -->
+    <g transform="translate(600,280)">
+      <circle cx="0" cy="0" r="4" fill="#7dd3fc" opacity="0.9" class="pulse"/>
+    </g>
+    <g transform="translate(820,370)">
+      <circle cx="0" cy="0" r="3" fill="#fef3c7" opacity="0.9" class="pulse"/>
+    </g>
+
+    <!-- Legend -->
+    <g transform="translate(10,820)">
+      <rect x="0" y="0" width="210" height="70" rx="8" fill="#061627" stroke="rgba(255,255,255,0.02)"/>
+      <text x="12" y="22" class="small mono" fill="#cbd5e1">Legend</text>
+      <g transform="translate(12,34)">
+        <rect x="0" y="-6" width="14" height="12" rx="3" fill="url(#trustGood)"/>
+        <text x="22" y="4" class="small mono">Trust: Good</text>
+
+        <rect x="0" y="14" width="14" height="12" rx="3" fill="url(#trustWarn)"/>
+        <text x="22" y="24" class="small mono">Trust: Warning</text>
+
+        <rect x="0" y="34" width="14" height="12" rx="3" fill="url(#trustBad)"/>
+        <text x="22" y="44" class="small mono">Trust: Low</text>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- Live Alerts panel (left of bottom) -->
+  <g transform="translate(220,1010)">
+    <!-- bottom area is below canvas; show alerts and tabs -->
+  </g>
+
+  <!-- Bottom tabbed panel -->
+  <g transform="translate(220,102)">
+    <!-- small placeholder to show where bottom tabs live visually (overlay) -->
+    <rect x="0" y="900" width="1400" height="180" rx="12" fill="#051827" stroke="rgba(255,255,255,0.02)" />
+    <text x="16" y="936" class="small mono" fill="#cbd5e1">Attack Timeline</text>
+    <text x="140" y="936" class="small mono" fill="#94a3b8">Packet Timeline</text>
+    <text x="300" y="936" class="small mono" fill="#94a3b8">Trust Evolution</text>
+    <text x="460" y="936" class="small mono" fill="#94a3b8">AI Predictions</text>
+
+    <!-- small charts placeholders -->
+    <g transform="translate(16,962)">
+      <rect x="0" y="0" width="320" height="104" rx="8" fill="#071322" stroke="rgba(255,255,255,0.02)"/>
+      <rect x="336" y="0" width="320" height="104" rx="8" fill="#071322" stroke="rgba(255,255,255,0.02)"/>
+      <rect x="656" y="0" width="320" height="104" rx="8" fill="#071322" stroke="rgba(255,255,255,0.02)"/>
+    </g>
+  </g>
+
+  <!-- subtle footer -->
+  <g transform="translate(0,1056)">
+    <rect x="0" y="0" width="1920" height="24" fill="#061220" />
+    <text x="16" y="18" class="small mono" fill="#64748b">System Health: CPU • GPU • RAM  •  FPS  •  Backend Latency</text>
+  </g>
+
+</svg>
